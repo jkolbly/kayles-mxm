@@ -1,10 +1,21 @@
 import itertools
 
+# A cache of grundy values for state n indexed by n.
+# -1 for values that have not been calculated
+grundy_cache = [0]
+
 # Calculate the Grundy number for the state n.
 # That is, the state with a single line of n adjacent stones.
 def simple_grundy(n):
-  if n == 0:
-    return 0
+  global grundy_cache
+
+  # If necessary, reallocate a larger Grundy cache
+  if n >= len(grundy_cache):
+    grundy_cache = grundy_cache + [-1] * (n + 1 - len(grundy_cache))
+
+  # Return cached value if it exists
+  if grundy_cache[n] >= 0:
+    return grundy_cache[n]
 
   # The grundy numbers  of accessible states
   # Uses a set for O(1) lookup when finding the mex
@@ -18,7 +29,10 @@ def simple_grundy(n):
   for i in range((n - 2) // 2 + 1):
     grundys.add(grundy(i, n - i - 2))
 
-  return mex(grundys)
+  # Cache this value for later
+  grundy_cache[n] = mex(grundys)
+
+  return grundy_cache[n]
 
 # Find the minimum excluded natural number from a set
 def mex(s):
