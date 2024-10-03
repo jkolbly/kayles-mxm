@@ -35,3 +35,7 @@ def grundy(*state):
   for n in state:
     ret ^= simple_grundy(n)
   return ret
+
+if __name__ == "__main__":
+  for i in range(201):
+    print(i, grundy(i))
