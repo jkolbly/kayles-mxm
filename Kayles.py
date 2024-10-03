@@ -11,7 +11,7 @@ def simple_grundy(n):
 
   # If necessary, reallocate a larger Grundy cache
   if n >= len(grundy_cache):
-    grundy_cache = grundy_cache + [-1] * (n + 1 - len(grundy_cache))
+    grundy_cache += [-1] * (n + 1 - len(grundy_cache))
 
   # Return cached value if it exists
   if grundy_cache[n] >= 0:
