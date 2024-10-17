@@ -43,6 +43,53 @@ def grundy_fork(n):
 
   return fork_cache[n]
 
+# A cache of grundy values for an n-spoon indexed by n.
+# -1 for values that have not been calculated
+spoon_cache = []
+
+# Get the Grundy value of a spoon graph with n edges to the right of the triangle.
+def grundy_spoon(n):
+  global spoon_cache
+
+  # If necessary, allocate a larger cache
+  if n >= len(spoon_cache):
+    spoon_cache += [-1] * (n + 1 - len(spoon_cache))
+
+  # Return cached value if it exists
+  if spoon_cache[n] >= 0:
+    return spoon_cache[n]
+  
+  # The Grundy values of accessible states
+  grundys = set()
+
+  # Remove the leftmost edge of the spoon
+  grundys.add(grundy_fork(n))
+
+  # Remove one of the side edges of the spoon
+  grundys.add(grundy_path(n+2))
+
+  # Remove the central vertex
+  grundys.add(grundy_path(1) ^ grundy_path(max(0, n-1)))
+
+  # Remove one of the side edges of the spoon
+  grundys.add(grundy_path(n+1))
+
+  # Remove one edge anywhere along the spoon's handle
+  for i in range(n):
+    grundys.add(grundy_path(i) ^ grundy_spoon(n-i-1))
+
+  # Remove one vertex anywhere along the spoon's handle
+  for i in range(n-1):
+    grundys.add(grundy_path(i) ^ grundy_spoon(n-i-2))
+
+  # Cache this value for later
+  spoon_cache[n] = Kayles.mex(grundys)
+
+  return spoon_cache[n]
+
 if __name__ == "__main__":
   for n in range(1001):
     print(n, grundy_fork(n))
+  
+  for n in range(1001):
+    print(n, grundy_spoon(n))
