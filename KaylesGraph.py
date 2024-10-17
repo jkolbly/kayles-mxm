@@ -88,7 +88,7 @@ def grundy_spoon(n):
   return spoon_cache[n]
 
 # A cache of grundy values for stars indexed by the string "length_1,...,length_n".
-# where length_1 through length_n are the lengths of each path in descending order
+# where length_1 through length_n are the lengths of each path in ascending order
 star_cache = {}
 
 # Get the Grundy value of a star (multiple paths connected at a single vertex).
