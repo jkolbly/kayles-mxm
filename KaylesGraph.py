@@ -111,6 +111,8 @@ def grundy_star(*lengths):
   # Check if this is a path
   if len(trimmed_lengths) == 1:
     return grundy_path(trimmed_lengths[0])
+  if len(trimmed_lengths) == 2:
+    return grundy_path(trimmed_lengths[0] + trimmed_lengths[1])
   
   # The set of grundy values of accessible states
   grundys = set()
