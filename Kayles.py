@@ -13,6 +13,7 @@ grundy_cache = [0]
 # Calculate the Grundy number for the state n.
 # That is, the state with a single line of n adjacent stones.
 def simple_grundy(n):
+  # For large n, this is periodic. No need to compute manually.
   if n >= GRUNDY_PERIOD_START:
     return GRUNDY_PERIOD[n % 12]
 
