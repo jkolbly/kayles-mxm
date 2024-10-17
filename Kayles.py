@@ -27,7 +27,7 @@ def simple_grundy(n):
   if grundy_cache[n] >= 0:
     return grundy_cache[n]
 
-  # The grundy numbers  of accessible states
+  # The grundy numbers of accessible states
   # Uses a set for O(1) lookup when finding the mex
   grundys = set()
 
