@@ -87,6 +87,52 @@ def grundy_spoon(n):
 
   return spoon_cache[n]
 
+# A cache of grundy values for stars indexed by the string "length_1,...,length_n".
+# where length_1 through length_n are the lengths of each path in descending order
+star_cache = {}
+
+# Get the Grundy value of a star (multiple paths connected at a single vertex).
+# Lengths of paths, in edges, are given by *lengths
+def grundy_star(*lengths):
+  global star_cache
+
+  # Sort lengths and remove all but nonzero lengths
+  trimmed_lengths = sorted(length for length in lengths if length > 0)
+  string_rep = ",".join(str(l) for l in trimmed_lengths)
+
+  # Check if we've already computed this
+  if string_rep in star_cache:
+    return star_cache[string_rep]
+  
+  # Check if this is empty
+  if len(trimmed_lengths) == 0:
+    return 0
+  
+  # Check if this is a path
+  if len(trimmed_lengths) == 1:
+    return grundy_path(trimmed_lengths[0])
+  
+  # The set of grundy values of accessible states
+  grundys = set()
+
+  # Remove the center vertex
+  grundys.add(grundy_star(*(length - 1 for length in trimmed_lengths)))
+
+  # Remove one edge from a side
+  for i, length in enumerate(trimmed_lengths):
+    for n in range(length):
+      grundys.add(grundy_path(n) ^ grundy_star(*(l if k != i else l - n - 1 for k, l in enumerate(trimmed_lengths))))
+
+  # Remove one vertex from a side
+  for i, length in enumerate(trimmed_lengths):
+    for n in range(length - 1):
+      grundys.add(grundy_path(n) ^ grundy_star(*(l if k != i else l - n - 2 for k, l in enumerate(trimmed_lengths))))
+
+  # Cache this value for later
+  star_cache[string_rep] = Kayles.mex(grundys)
+
+  return star_cache[string_rep]
+
 if __name__ == "__main__":
   for n in range(1001):
     print(n, grundy_fork(n))
