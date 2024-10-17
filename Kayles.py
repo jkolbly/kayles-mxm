@@ -1,5 +1,11 @@
 import itertools
 
+# The smallest value for which a single line of n stones is periodic.
+GRUNDY_PERIOD_START = 72
+
+# A single period of the Grundy value for a single line of n stones.
+GRUNDY_PERIOD = [4,1,2,8,1,4,7,2,1,8,2,7]
+
 # A cache of grundy values for state n indexed by n.
 # -1 for values that have not been calculated
 grundy_cache = [0]
@@ -7,6 +13,9 @@ grundy_cache = [0]
 # Calculate the Grundy number for the state n.
 # That is, the state with a single line of n adjacent stones.
 def simple_grundy(n):
+  if n >= GRUNDY_PERIOD_START:
+    return GRUNDY_PERIOD[n % 12]
+
   global grundy_cache
 
   # If necessary, reallocate a larger Grundy cache
