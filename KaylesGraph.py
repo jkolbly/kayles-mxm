@@ -118,7 +118,10 @@ def grundy_star(*lengths):
   grundys = set()
 
   # Remove the center vertex
-  grundys.add(grundy_star(*(length - 1 for length in trimmed_lengths)))
+  sum = 0
+  for length in trimmed_lengths:
+    sum ^= grundy_path(length - 1)
+  grundys.add(sum)
 
   # Remove one edge from a side
   for i, length in enumerate(trimmed_lengths):
