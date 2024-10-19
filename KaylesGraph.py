@@ -123,14 +123,15 @@ def grundy_star(*lengths):
     sum ^= grundy_path(length - 1)
   grundys.add(sum)
 
-  # This is a slight optimization where we only need to check unique lengths
-  checked_lengths = set()
+  # This is a slight optimization where we only need to check unique lengths.
+  # Since lengths are sorted, we just need to check the previous one.
+  prev_length = None
 
   for i, length in enumerate(trimmed_lengths):
     # No need if we've already removed from a side of this length (due to symmetry)
-    if length in checked_lengths:
+    if length == prev_length:
       continue
-    checked_lengths.add(length)
+    prev_length = length
 
     # Remove one edge from a side
     for n in range(length):
