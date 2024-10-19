@@ -123,13 +123,20 @@ def grundy_star(*lengths):
     sum ^= grundy_path(length - 1)
   grundys.add(sum)
 
-  # Remove one edge from a side
+  # This is a slight optimization where we only need to check unique lengths
+  checked_lengths = set()
+
   for i, length in enumerate(trimmed_lengths):
+    # No need if we've already removed from a side of this length (due to symmetry)
+    if length in checked_lengths:
+      continue
+    checked_lengths.add(length)
+
+    # Remove one edge from a side
     for n in range(length):
       grundys.add(grundy_path(n) ^ grundy_star(*(l if k != i else l - n - 1 for k, l in enumerate(trimmed_lengths))))
 
-  # Remove one vertex from a side
-  for i, length in enumerate(trimmed_lengths):
+    # Remove one vertex from a side
     for n in range(length - 1):
       grundys.add(grundy_path(n) ^ grundy_star(*(l if k != i else l - n - 2 for k, l in enumerate(trimmed_lengths))))
 
