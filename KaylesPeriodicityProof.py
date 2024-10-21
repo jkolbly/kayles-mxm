@@ -16,6 +16,9 @@ def prove_kayles_periodicity(verbose=False):
   # The size of the base case
   base_length = 144
 
+  # Where periodiciy starts
+  periodicity_start = 72
+
   # The grundy values for the base case.
   base_case = [grundy(n) for n in range(base_length)]
 
@@ -25,6 +28,13 @@ def prove_kayles_periodicity(verbose=False):
   # The expected grundy values we will check against.
   # By the inductive hypothesis, we will also use these when computing grundy values of moves.
   expected_grundys = [grundy(base_length + offset) for offset in range(period)]
+
+  # Verify manually the values for 72<=n<144
+  for i in range(periodicity_start, base_length):
+    if base_case[i] != expected_grundys[i % 12]:
+      return False
+  if verbose:
+    print(f'The base case holds.')
 
   # Maps the grundy values that appear only in the base case to a list of indices at which
   # they appear.
