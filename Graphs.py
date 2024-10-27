@@ -1,5 +1,6 @@
 import networkx as nx
 import Kayles
+import matplotlib.pyplot as plt
 
 # Maps graph hashes to grundy values
 grundy_cache = {}
@@ -68,6 +69,11 @@ def path_of_fork_spoons(n: int, num_spoons: int) -> nx.Graph:
   G = path_of_forks(n)
   G.add_edges_from([[-3 * (v+1) + 1, -3 * (v+1) + 2] for v in range(min(n+1, num_spoons))])
   return G
+
+# Visually display a graph
+def show_graph(graph: nx.Graph):
+  nx.draw(graph, with_labels=True, font_weight='bold')
+  plt.show()
 
 if __name__ == "__main__":
   for i in range(1000):
