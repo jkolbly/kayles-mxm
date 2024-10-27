@@ -51,6 +51,24 @@ def grundy(graph: nx.Graph) -> int:
   grundy_cache[graph_hash] = ret
   return ret
 
+# Generate a graph that is a path with n edges with a fork coming off of each vertex
+def path_of_forks(n: int) -> nx.Graph:
+  G: nx.Graph = nx.path_graph(n=n+1)
+  for v in range(n+1):
+    G.add_nodes_from([-3 * (v+1), -3 * (v+1) + 1, -3 * (v+1) + 2])
+    G.add_edges_from([
+      [v, -3 * (v+1)],
+      [-3 * (v+1), -3 * (v+1) + 1],
+      [-3 * (v+1), -3 * (v+1) + 2]
+    ])
+  return G
+
+# Generate a graph that is path_of_forks(n) with num_spoons of the forks converted to spoons
+def path_of_fork_spoons(n: int, num_spoons: int) -> nx.Graph:
+  G = path_of_forks(n)
+  G.add_edges_from([[-3 * (v+1) + 1, -3 * (v+1) + 2] for v in range(min(n+1, num_spoons))])
+  return G
+
 if __name__ == "__main__":
   for i in range(1000):
     G = nx.path_graph(n=i+1)
