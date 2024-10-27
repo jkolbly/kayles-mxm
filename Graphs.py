@@ -18,8 +18,6 @@ def write_to_cache(graph: nx.Graph, grundy: int):
   with open(CACHE_FILENAME, "a+") as f:
     f.write(f'{graph_hash},{grundy},{string_rep}')
 
-  show_graph(graph)
-
 # Load grundy_cache from a file
 def load_cache():
   print("Loading cache...")
