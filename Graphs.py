@@ -13,10 +13,12 @@ def write_to_cache(graph: nx.Graph, grundy: int):
   graph_hash = nx.weisfeiler_lehman_graph_hash(graph)
   grundy_cache[nx.weisfeiler_lehman_graph_hash(graph)] = grundy
 
-  adj_list = "\\n".join(nx.generate_adjlist(graph))
+  string_rep = nx.to_sparse6_bytes(graph).decode("utf-8")
   
   with open(CACHE_FILENAME, "a+") as f:
-    f.write(f'{graph_hash},{grundy},{adj_list}\n')
+    f.write(f'{graph_hash},{grundy},{string_rep}')
+
+  show_graph(graph)
 
 # Load grundy_cache from a file
 def load_cache():
