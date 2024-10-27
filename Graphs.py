@@ -2,8 +2,34 @@ import networkx as nx
 import Kayles
 import matplotlib.pyplot as plt
 
+# The file in which grundy_cache is stored
+CACHE_FILENAME = "data/graph-cache"
+
 # Maps graph hashes to grundy values
 grundy_cache = {}
+
+# Write a single value to the grundy cache and update the file
+def write_to_cache(graph: nx.Graph, grundy: int):
+  graph_hash = nx.weisfeiler_lehman_graph_hash(graph)
+  grundy_cache[nx.weisfeiler_lehman_graph_hash(graph)] = grundy
+
+  adj_list = "\\n".join(nx.generate_adjlist(graph))
+  
+  with open(CACHE_FILENAME, "a+") as f:
+    f.write(f'{graph_hash},{grundy},{adj_list}\n')
+
+# Load grundy_cache from a file
+def load_cache():
+  print("Loading cache...")
+  try:
+    with open(CACHE_FILENAME) as f:
+      lines = f.readlines()
+      for line in lines:
+        split = line.strip().split(",")
+        grundy_cache[split[0]] = int(split[1])
+  except OSError:
+    pass
+  print("Cache loaded")
 
 # Get the grundy value of an arbitrary graph
 def grundy(graph: nx.Graph) -> int:
@@ -49,7 +75,7 @@ def grundy(graph: nx.Graph) -> int:
 
   # The grundy value is the mex of the computed grundys
   ret = Kayles.mex(grundys)
-  grundy_cache[graph_hash] = ret
+  write_to_cache(graph, ret)
   return ret
 
 # Generate a graph that is a path with n edges with a fork coming off of each vertex
@@ -77,6 +103,9 @@ def show_graph(graph: nx.Graph):
   else:
     nx.draw(graph, with_labels=True, font_weight='bold')
   plt.show()
+
+# Load the grundy cache
+load_cache()
 
 if __name__ == "__main__":
   for i in range(1000):
