@@ -72,7 +72,10 @@ def path_of_fork_spoons(n: int, num_spoons: int) -> nx.Graph:
 
 # Visually display a graph
 def show_graph(graph: nx.Graph):
-  nx.draw(graph, with_labels=True, font_weight='bold')
+  if nx.is_planar(graph):
+    nx.draw_planar(graph, with_labels=True, font_weight='bold')
+  else:
+    nx.draw(graph, with_labels=True, font_weight='bold')
   plt.show()
 
 if __name__ == "__main__":
