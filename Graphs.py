@@ -96,6 +96,13 @@ def path_of_fork_spoons(n: int, num_spoons: int) -> nx.Graph:
   G.add_edges_from([[-3 * (v+1) + 1, -3 * (v+1) + 2] for v in range(min(n+1, num_spoons))])
   return G
 
+# Generate a graph that is two paths with n edges connected like a ladder
+def ladder(n: int) -> nx.Graph:
+  G: nx.Graph = nx.path_graph(n=n+1)
+  nx.add_path(G, [-i-1 for i in range(n+1)])
+  G.add_edges_from([(i, -i-1) for i in range(n+1)])
+  return G
+
 # Visually display a graph
 def show_graph(graph: nx.Graph):
   if nx.is_planar(graph):
