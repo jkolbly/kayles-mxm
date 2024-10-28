@@ -112,6 +112,12 @@ def lollipop(n: int, m: int) -> nx.Graph:
   G.add_edge(-m+1, 0)
   return G
 
+# Generate a path of length n where nodes are also connected to neighbors a distance of 2 away
+def double_path(n: int) -> nx.Graph:
+  G: nx.Graph = nx.path_graph(n=n+1)
+  G.add_edges_from([(i, i+2) for i in range(n-1)])
+  return G
+
 # Visually display a graph
 def show_graph(graph: nx.Graph):
   if nx.is_planar(graph):
