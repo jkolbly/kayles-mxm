@@ -112,6 +112,17 @@ def lollipop(n: int, m: int) -> nx.Graph:
   G.add_edge(-m+1, 0)
   return G
 
+# Generate a graph that is a path with n edges connected on either side to cycles of length m and k
+def barbell(n: int, m: int, k: int) -> nx.Graph:
+  if m <= 2 or k <= 2:
+    raise ValueError("A cycle must be of length at least 3")
+  G: nx.Graph = nx.path_graph(n=n+1)
+  nx.add_path(G, [-i for i in range(m)])
+  G.add_edge(-m+1, 0)
+  nx.add_path(G, [i for i in range(n, n+k)])
+  G.add_edge(n+k-1, n)
+  return G
+
 # Generate a path of length n where nodes are also connected to neighbors a distance of 2 away
 def double_path(n: int) -> nx.Graph:
   G: nx.Graph = nx.path_graph(n=n+1)
