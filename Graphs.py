@@ -31,6 +31,32 @@ def load_cache():
     pass
   print("Cache loaded")
 
+# Get all states accessible from a graph
+def get_moves(graph: nx.Graph) -> list[nx.Graph]:
+  accessible_states = []
+
+  # Remove a single edge and trim orphaned vertices
+  for e in graph.edges:
+    new_graph = graph.copy()
+    new_graph.remove_edge(e[0], e[1])
+    if new_graph.degree[e[0]] == 0:
+      new_graph.remove_node(e[0])
+    if new_graph.degree[e[1]] == 0:
+      new_graph.remove_node(e[1])
+    accessible_states.append(new_graph)
+
+  # Remove a vertex and trim orphaned vertices
+  for v in graph.nodes:
+    new_graph = graph.copy()
+    neighbors = [e[1] for e in graph.edges(v)]
+    new_graph.remove_node(v)
+    for n in neighbors:
+      if new_graph.degree[n] == 0:
+        new_graph.remove_node(n)
+    accessible_states.append(new_graph)
+  
+  return accessible_states
+
 # Get the grundy value of an arbitrary graph
 def grundy(graph: nx.Graph) -> int:
   # The base case is an empty graph (grundy 0)
@@ -51,27 +77,7 @@ def grundy(graph: nx.Graph) -> int:
     return grundy_cache[graph_hash]
 
   # The grundy values of accessible states
-  grundys = set()
-
-  # Remove a single edge and trim orphaned vertices
-  for e in graph.edges:
-    new_graph = graph.copy()
-    new_graph.remove_edge(e[0], e[1])
-    if new_graph.degree[e[0]] == 0:
-      new_graph.remove_node(e[0])
-    if new_graph.degree[e[1]] == 0:
-      new_graph.remove_node(e[1])
-    grundys.add(grundy(new_graph))
-
-  # Remove a vertex and trim orphaned vertices
-  for v in graph.nodes:
-    new_graph = graph.copy()
-    neighbors = [e[1] for e in graph.edges(v)]
-    new_graph.remove_node(v)
-    for n in neighbors:
-      if new_graph.degree[n] == 0:
-        new_graph.remove_node(n)
-    grundys.add(grundy(new_graph))
+  grundys = set(grundy(G) for G in get_moves(graph))
 
   # The grundy value is the mex of the computed grundys
   ret = Kayles.mex(grundys)
