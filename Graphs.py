@@ -135,6 +135,15 @@ def double_path(n: int) -> nx.Graph:
   G.add_edges_from([(i, i+2) for i in range(n-1)])
   return G
 
+# Generate a graph that looks like |_|_|_|_|_| (n=5)
+# `closed` determines whether the last edge is present
+def spikes(n: int, closed: bool=True) -> nx.Graph:
+  G: nx.Graph = nx.path_graph(n=n+1)
+  new_node_num = n+1 if closed else n
+  G.add_nodes_from([n+i+1 for i in range(new_node_num)])
+  G.add_edges_from([(i,n+i+1) for i in range(new_node_num)])
+  return G
+
 # Visually display a graph
 def show_graph(graph: nx.Graph, positions: dict = None):
   if positions is not None:
