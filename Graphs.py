@@ -136,8 +136,10 @@ def double_path(n: int) -> nx.Graph:
   return G
 
 # Visually display a graph
-def show_graph(graph: nx.Graph):
-  if nx.is_planar(graph):
+def show_graph(graph: nx.Graph, positions: dict = None):
+  if positions is not None:
+    nx.draw(graph, with_labels=True, font_weight='bold', pos=positions)
+  elif nx.is_planar(graph):
     nx.draw_planar(graph, with_labels=True, font_weight='bold')
   else:
     nx.draw(graph, with_labels=True, font_weight='bold')
