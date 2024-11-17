@@ -158,6 +158,70 @@ def get_best_from_file(filename: str):
         max_so_far = grundy(G)
   return max_so_far
 
+# Play a game against the computer using a text interface
+def play_game(graph: nx.Graph, user_first: bool):
+  # true if it's the user's turn, false otherwise
+  user_turn = user_first
+
+  positions = nx.planar_layout(graph) if nx.is_planar(graph) else nx.spring_layout(graph)
+
+  while len(graph.edges) > 0:
+    show_graph(graph, positions)
+    if user_turn:
+      print("Type your move as either a single number ('0') for a vertex or two numbers ('0 1') for an edge:")
+      print("Type 'show' to show the graph again.")
+      while True:
+        move_str = input("Your Move: ")
+        if move_str.lower() == "show":
+          show_graph(graph, positions)
+          continue
+        move_split = move_str.split(" ")
+        try:
+          move_nums = [int(s) for s in move_split]
+          if len(move_nums) == 1:
+            if move_nums[0] not in graph.nodes:
+              print(f"{n} is not a node in the graph.")
+              continue
+            neighbors = [e[1] for e in graph.edges(move_nums[0])]
+            graph.remove_node(move_nums[0])
+            for n in neighbors:
+              if graph.degree[n] == 0:
+                graph.remove_node(n)
+          elif len(move_nums) == 2:
+            if not graph.has_edge(move_nums[0], move_nums[1]):
+              print(f"{move_nums[0]} {move_nums[1]} is not an edge in the graph.")
+              continue
+            graph.remove_edge(move_nums[0], move_nums[1])
+            if graph.degree[move_nums[0]] == 0:
+              graph.remove_node(move_nums[0])
+            if graph.degree[move_nums[1]] == 0:
+              graph.remove_node(move_nums[1])
+          else:
+            print("Your move must be one or two integers separated by a space.")
+            continue
+        except:
+          print("Your move should be either one or two integers separated by a space.")
+          continue
+        break
+      user_turn = False
+    else:
+      moves = get_moves(graph)
+      best_move = None
+      best_grundy = None
+      for move in moves:
+        g = grundy(move[0])
+        if best_move is None or g < best_grundy:
+          best_grundy = g
+          best_move = move
+      print(f"Computer removes {best_move[1]} (grundy {best_grundy})")
+      graph = best_move[0]
+      user_turn = True
+  
+  if user_turn:
+    print("Computer wins!")
+  else:
+    print("You win!")
+
 # Load the grundy cache
 load_cache()
 
