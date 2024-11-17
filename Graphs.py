@@ -32,7 +32,7 @@ def load_cache():
   print("Cache loaded")
 
 # Get all states accessible from a graph
-def get_moves(graph: nx.Graph) -> list[nx.Graph]:
+def get_moves(graph: nx.Graph) -> list[(nx.Graph, str)]:
   accessible_states = []
 
   # Remove a single edge and trim orphaned vertices
@@ -43,7 +43,7 @@ def get_moves(graph: nx.Graph) -> list[nx.Graph]:
       new_graph.remove_node(e[0])
     if new_graph.degree[e[1]] == 0:
       new_graph.remove_node(e[1])
-    accessible_states.append(new_graph)
+    accessible_states.append((new_graph, f"edge {e[0]}-{e[1]}"))
 
   # Remove a vertex and trim orphaned vertices
   for v in graph.nodes:
@@ -53,7 +53,7 @@ def get_moves(graph: nx.Graph) -> list[nx.Graph]:
     for n in neighbors:
       if new_graph.degree[n] == 0:
         new_graph.remove_node(n)
-    accessible_states.append(new_graph)
+    accessible_states.append((new_graph, f"vertex {v}"))
   
   return accessible_states
 
@@ -77,7 +77,7 @@ def grundy(graph: nx.Graph) -> int:
     return grundy_cache[graph_hash]
 
   # The grundy values of accessible states
-  grundys = set(grundy(G) for G in get_moves(graph))
+  grundys = set(grundy(G[0]) for G in get_moves(graph))
 
   # The grundy value is the mex of the computed grundys
   ret = Kayles.mex(grundys)
