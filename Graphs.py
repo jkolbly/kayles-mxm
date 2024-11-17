@@ -137,6 +137,19 @@ def show_graph(graph: nx.Graph):
     nx.draw(graph, with_labels=True, font_weight='bold')
   plt.show()
 
+# Return the best grundy value from a file of graph6-format graphs
+def get_best_from_file(filename: str):
+  max_so_far = 0
+  with open(filename) as f:
+    while f.readable():
+      line = f.readline().strip()
+      if len(line) == 0:
+        break
+      G = nx.from_graph6_bytes(line.encode("utf-8"))
+      if grundy(G) > max_so_far:
+        max_so_far = grundy(G)
+  return max_so_far
+
 # Load the grundy cache
 load_cache()
 
