@@ -144,6 +144,21 @@ def spikes(n: int, closed: bool=True) -> nx.Graph:
   G.add_edges_from([(i,n+i+1) for i in range(new_node_num)])
   return G
 
+# Generate a fork graph
+def fork(n: int) -> nx.Graph:
+  G: nx.Graph = nx.path_graph(n=n+2)
+  G.add_node(-1)
+  G.add_edge(-1, 1)
+  return G
+
+# Generate a spoon graph
+def spoon(n: int) -> nx.Graph:
+  G: nx.Graph = nx.path_graph(n=n+2)
+  G.add_node(-1)
+  G.add_edge(-1, 0)
+  G.add_edge(-1, 1)
+  return G
+
 # Visually display a graph
 def show_graph(graph: nx.Graph, positions: dict = None):
   if positions is not None:
