@@ -152,12 +152,12 @@ def double_path(n: int) -> nx.Graph:
   return G
 
 # Generate a graph that looks like |_|_|_|_|_| (n=5)
-# `closed` determines whether the last edge is present
-def spikes(n: int, closed: bool=True) -> nx.Graph:
+# `closed_right` and `closed_left` determine whether the last edges is present
+def spikes(n: int, closed_left: bool=True, closed_right: bool=True) -> nx.Graph:
   G: nx.Graph = nx.path_graph(n=n+1)
-  new_node_num = n+1 if closed else n
+  new_node_num = n+1 if closed_left and closed_right else n if closed_left or closed_right else n-1
   G.add_nodes_from([n+i+1 for i in range(new_node_num)])
-  G.add_edges_from([(i,n+i+1) for i in range(new_node_num)])
+  G.add_edges_from([(i if closed_left else i+1,n+i+1) for i in range(new_node_num)])
   return G
 
 # Generate a fork graph
