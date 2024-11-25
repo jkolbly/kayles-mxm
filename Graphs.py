@@ -6,7 +6,7 @@ import SpecialGraphs
 # The file in which grundy_cache is stored
 CACHE_FILENAME = "data/graph-cache"
 
-# Maps graph hashes to lists of tuples (G,g) of a graph and a grundy value
+# Maps graph hashes to lists of arrays [G,g] of a graph or sparse6 graph representation and a grundy value
 grundy_cache = {}
 
 # Write a single value to the grundy cache and update the file
@@ -14,9 +14,9 @@ def write_to_cache(graph: nx.Graph, grundy: int):
   graph_hash = nx.weisfeiler_lehman_graph_hash(graph)
 
   if graph_hash in grundy_cache:
-    grundy_cache[graph_hash].append((graph, grundy))
+    grundy_cache[graph_hash].append([graph, grundy])
   else:
-    grundy_cache[graph_hash] = [(graph, grundy)]
+    grundy_cache[graph_hash] = [[graph, grundy]]
 
   string_rep = nx.to_sparse6_bytes(graph).decode("utf-8")
   
@@ -34,12 +34,11 @@ def load_cache():
       lines = f.readlines()
       for line in lines:
         split = line.strip().split(",")
-        graph = nx.from_sparse6_bytes(split[2].encode("utf-8"))
         grundy = int(split[1])
         if split[0] in grundy_cache:
-          grundy_cache[split[0]].append((graph, grundy))
+          grundy_cache[split[0]].append([split[2].encode("utf-8"), grundy])
         else:
-          grundy_cache[split[0]] = [(graph, grundy)]
+          grundy_cache[split[0]] = [[split[2].encode("utf-8"), grundy]]
   except OSError:
     pass
   print("Cache loaded")
@@ -87,9 +86,11 @@ def grundy(graph: nx.Graph) -> int:
   # Check the cache to avoid recomputation
   graph_hash = nx.weisfeiler_lehman_graph_hash(graph)
   if graph_hash in grundy_cache:
-    for (G, g) in grundy_cache[graph_hash]:
-      if nx.is_isomorphic(G, graph):
-        return g
+    for cache_line in grundy_cache[graph_hash]:
+      if type(cache_line[0]) is bytes:
+        cache_line[0] = nx.from_sparse6_bytes(cache_line[0])
+      if nx.is_isomorphic(cache_line[0], graph):
+        return cache_line[1]
 
   # The grundy values of accessible states
   grundys = set(grundy(G[0]) for G in get_moves(graph))
