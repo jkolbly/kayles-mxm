@@ -25,6 +25,9 @@ def write_to_cache(graph: nx.Graph, grundy: int):
 
 # Load grundy_cache from a file
 def load_cache():
+  global grundy_cache
+  grundy_cache = {}
+
   print("Loading cache...")
   try:
     with open(CACHE_FILENAME) as f:
