@@ -185,9 +185,9 @@ def show_graph(graph: nx.Graph, positions: dict = None, with_labels: bool = True
   if positions is not None:
     nx.draw(graph, with_labels=with_labels, pos=positions, **draw_kwargs)
   elif nx.is_planar(graph):
-    nx.draw_planar(graph, with_labels=with_labels, font_weight='bold', **draw_kwargs)
+    nx.draw_planar(graph, with_labels=with_labels, **draw_kwargs)
   else:
-    nx.draw(graph, with_labels=with_labels, font_weight='bold', **draw_kwargs)
+    nx.draw(graph, with_labels=with_labels, **draw_kwargs)
 
   # Scale axes equally
   plt.gca().set_aspect('equal', adjustable='box')
