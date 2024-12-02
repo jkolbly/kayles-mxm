@@ -176,7 +176,7 @@ def spoon(n: int) -> nx.Graph:
   return G
 
 # Visually display a graph
-def show_graph(graph: nx.Graph, positions: dict = None, with_labels: bool = True, **kwargs):
+def show_graph(graph: nx.Graph, positions: dict = None, with_labels: bool = True, save: bool = False, **kwargs):
   draw_kwargs = {
     "font_weight": 'bold',
   }
@@ -192,6 +192,9 @@ def show_graph(graph: nx.Graph, positions: dict = None, with_labels: bool = True
   # Scale axes equally
   plt.gca().set_aspect('equal', adjustable='box')
 
+  if save:
+    plt.savefig("out.png", transparent=True, bbox_inches="tight", pad_inches=0)
+  
   plt.show()
 
 # Return the best grundy value from a file of graph6-format graphs
