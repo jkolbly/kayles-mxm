@@ -9,8 +9,9 @@ CACHE_FILENAME = "data/graph-cache"
 grundy_cache = {}
 
 # Write a single value to the grundy cache and update the file
-def write_to_cache(graph: nx.Graph, grundy: int):
-  graph_hash = nx.weisfeiler_lehman_graph_hash(graph)
+def write_to_cache(graph: nx.Graph, grundy: int, graph_hash: str=None):
+  if graph_hash is None:
+    graph_hash = nx.weisfeiler_lehman_graph_hash(graph)
 
   if graph_hash in grundy_cache:
     grundy_cache[graph_hash].append([graph, grundy])
@@ -96,7 +97,7 @@ def grundy(graph: nx.Graph) -> int:
 
   # The grundy value is the mex of the computed grundys
   ret = Kayles.mex(grundys)
-  write_to_cache(graph, ret)
+  write_to_cache(graph, ret, graph_hash)
   return ret
 
 # Generate a graph that is a path with n edges with a fork coming off of each vertex
