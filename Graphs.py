@@ -33,10 +33,9 @@ def write_to_cache(graph: nx.Graph, grundy: int, graph_hash: str=None):
   
 # Append the cache buffer to the cache file and clear the buffer
 def flush_cache_buffer():
-  global cache_buffer
   with open(CACHE_FILENAME, "a+") as f:
     f.writelines(cache_buffer)
-  cache_buffer = []
+  cache_buffer.clear()
 
 # Load grundy_cache from a file
 def load_cache():
