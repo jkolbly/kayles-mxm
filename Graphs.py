@@ -5,10 +5,16 @@ import matplotlib.pyplot as plt
 # The file in which grundy_cache is stored
 CACHE_FILENAME = "data/graph-cache"
 
+# How many graphs to compute before updating the cache file
+CACHE_BUFFER_SIZE = 1000
+
 # Maps graph hashes to lists of arrays [G,g] of a graph or sparse6 graph representation and a grundy value
 grundy_cache = {}
 
-# Write a single value to the grundy cache and update the file
+# A list of lines to add to the cache file when next updating it
+cache_buffer = []
+
+# Write a single value to the grundy cache
 def write_to_cache(graph: nx.Graph, grundy: int, graph_hash: str=None):
   if graph_hash is None:
     graph_hash = nx.weisfeiler_lehman_graph_hash(graph)
@@ -19,9 +25,18 @@ def write_to_cache(graph: nx.Graph, grundy: int, graph_hash: str=None):
     grundy_cache[graph_hash] = [[graph, grundy]]
 
   string_rep = nx.to_sparse6_bytes(graph).decode("utf-8")
+
+  cache_buffer.append(f'{graph_hash},{grundy},{string_rep}')
+
+  if len(cache_buffer) > CACHE_BUFFER_SIZE:
+    flush_cache_buffer()
   
+# Append the cache buffer to the cache file and clear the buffer
+def flush_cache_buffer():
+  global cache_buffer
   with open(CACHE_FILENAME, "a+") as f:
-    f.write(f'{graph_hash},{grundy},{string_rep}')
+    f.writelines(cache_buffer)
+  cache_buffer = []
 
 # Load grundy_cache from a file
 def load_cache():
@@ -277,8 +292,12 @@ def play_game(graph: nx.Graph, user_first: bool):
 # Load the grundy cache
 load_cache()
 
-if __name__ == "__main__":
-  for i in range(1000):
-    G = nx.path_graph(n=i+1)
-    print(i, grundy(G), Kayles.grundy(i))
-    assert grundy(G) == Kayles.grundy(i)
+try:
+  if __name__ == "__main__":  
+    for n in range(10):
+      for m in range(1, n+1):
+        print(n, m, grundy(nx.complete_bipartite_graph(n, m)))
+except KeyboardInterrupt:
+  pass
+
+flush_cache_buffer()
