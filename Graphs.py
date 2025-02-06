@@ -1,7 +1,6 @@
 import networkx as nx
 import Kayles
 import matplotlib.pyplot as plt
-import SpecialGraphs
 
 # The file in which grundy_cache is stored
 CACHE_FILENAME = "data/graph-cache"
