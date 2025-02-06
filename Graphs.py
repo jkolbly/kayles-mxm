@@ -28,7 +28,7 @@ def write_to_cache(graph: nx.Graph, grundy: int, graph_hash: str=None):
 
   cache_buffer.append(f'{graph_hash},{grundy},{string_rep}')
 
-  if len(cache_buffer) > CACHE_BUFFER_SIZE:
+  if len(cache_buffer) >= CACHE_BUFFER_SIZE:
     flush_cache_buffer()
   
 # Append the cache buffer to the cache file and clear the buffer
