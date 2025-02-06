@@ -299,4 +299,5 @@ try:
 except KeyboardInterrupt:
   pass
 
+print("Writing to cache file...")
 flush_cache_buffer()
