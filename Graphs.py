@@ -225,11 +225,11 @@ def get_best_from_file(filename: str):
   return max_so_far
 
 # Play a game against the computer using a text interface
-def play_game(graph: nx.Graph, user_first: bool):
+def play_game(graph: nx.Graph, user_first: bool, positions: dict = None):
   # true if it's the user's turn, false otherwise
   user_turn = user_first
 
-  positions = nx.planar_layout(graph) if nx.is_planar(graph) else nx.spring_layout(graph)
+  positions = positions if positions is not None else nx.planar_layout(graph) if nx.is_planar(graph) else nx.spring_layout(graph)
 
   while len(graph.edges) > 0:
     show_graph(graph, positions)
