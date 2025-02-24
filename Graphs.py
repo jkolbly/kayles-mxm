@@ -254,7 +254,7 @@ def play_game(graph: nx.Graph, user_first: bool, positions: dict = None):
       print("Type 'show' to show the graph again.")
       while True:
         move_str = input("Your Move: ")
-        if move_str.lower() == "show":
+        if move_str.lower() in ["show", "s"]:
           show_graph(graph, positions)
           continue
         move_split = move_str.split(" ")
@@ -298,7 +298,7 @@ def play_game(graph: nx.Graph, user_first: bool, positions: dict = None):
           while True:
             print(f"Winning computer moves are: {', '.join(m[1] for m in best_moves)}")
             user_selection = input("Select the move the computer will play: ")
-            if user_selection.lower() == "show":
+            if user_selection.lower() in ["show", "s"]:
               show_graph(graph, positions)
               continue
             if user_selection in [m[1] for m in best_moves]:
