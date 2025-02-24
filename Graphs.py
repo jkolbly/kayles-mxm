@@ -83,6 +83,20 @@ def get_moves(graph: nx.Graph) -> list[tuple[nx.Graph, str]]:
   
   return accessible_states
 
+# Get all states accessible from a graph, removing isomorphic states
+def get_moves_unique(graph: nx.Graph) -> list[tuple[nx.Graph, str]]:
+  isoclasses = {}
+  
+  for m in get_moves(graph):
+    hash = nx.weisfeiler_lehman_graph_hash(m[0])
+    if hash in isoclasses:
+      if any(nx.is_isomorphic(m[0], g[0]) for g in isoclasses[hash]):
+        isoclasses[hash].append(m)
+    else:
+      isoclasses[hash] = [m]
+
+  return [iclass[0] for iclass in isoclasses.values()]
+
 # Get the grundy value of an arbitrary graph
 def grundy(graph: nx.Graph) -> int:
   # The base case is an empty graph (grundy 0)
@@ -271,16 +285,25 @@ def play_game(graph: nx.Graph, user_first: bool, positions: dict = None):
         break
       user_turn = False
     else:
-      moves = get_moves(graph)
-      best_move = None
-      best_grundy = None
-      for move in moves:
-        g = grundy(move[0])
-        if best_move is None or g < best_grundy:
-          best_grundy = g
-          best_move = move
-      print(f"Computer removes {best_move[1]} (grundy {best_grundy})")
-      graph = best_move[0]
+      moves = get_moves_unique(graph)
+      grundys = [grundy(move[0]) for move in moves]
+      best_grundy = min(grundys)
+      best_moves = [m for i,m in enumerate(moves) if grundys[i] == best_grundy]
+      selected_move = best_moves[0]
+      if best_grundy == 0:
+        print("The computer will win")
+        if len(best_moves) > 1:
+          while True:
+            print(f"Winning computer moves are: {', '.join(m[1] for m in best_moves)}")
+            user_selection = input("Select the move the computer will play: ")
+            if user_selection.lower() == "show":
+              show_graph(graph, positions)
+              continue
+            if user_selection in [m[1] for m in best_moves]:
+              break
+          selected_move = next(m for m in best_moves if m[1] == user_selection)
+      print(f"Computer removes {selected_move[1]}")
+      graph = selected_move[0]
       user_turn = True
   
   if user_turn:
