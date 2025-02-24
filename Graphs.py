@@ -58,7 +58,7 @@ def load_cache():
   print("Cache loaded")
 
 # Get all states accessible from a graph
-def get_moves(graph: nx.Graph) -> list[(nx.Graph, str)]:
+def get_moves(graph: nx.Graph) -> list[tuple[nx.Graph, str]]:
   accessible_states = []
 
   # Remove a single edge and trim orphaned vertices
