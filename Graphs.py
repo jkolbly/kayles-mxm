@@ -248,6 +248,8 @@ def play_game(graph: nx.Graph, user_first: bool, positions: dict = None):
   while len(graph.edges) > 0:
     show_graph(graph, positions)
     if user_turn:
+      move_strs = [f"{s} ({grundy(g)})" for g, s in get_moves_unique(graph)]
+      print(f"Available moves: {', '.join(move_strs)}")
       print("Type your move as either a single number ('0') for a vertex or two numbers ('0 1') for an edge:")
       print("Type 'show' to show the graph again.")
       while True:
