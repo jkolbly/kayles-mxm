@@ -210,7 +210,7 @@ def double_path(n: int) -> nx.Graph:
   return G
 
 # Generate a graph that looks like |_|_|_|_|_| (n=5)
-# `closed_right` and `closed_left` determine whether the last edges is present
+# `closed_right` and `closed_left` determine whether the last edges are present
 def spikes(n: int, closed_left: bool=True, closed_right: bool=True) -> nx.Graph:
   G: nx.Graph = nx.path_graph(n=n+1)
   new_node_num = n+1 if closed_left and closed_right else n if closed_left or closed_right else n-1
