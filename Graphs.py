@@ -353,9 +353,14 @@ load_cache()
 
 try:
   if __name__ == "__main__":  
-    for n in range(10):
-      for m in range(1, n+1):
-        print(n, m, grundy(nx.complete_bipartite_graph(n, m)))
+    n = 3
+    m = 5
+    positions = {i:[0, i] for i in range(n)}
+    positions |= { i: [1,i-n-0.5] for i in range(n, n+m-1) }
+    positions |= { n+m-1: [-1,1] }
+
+    while True:
+      play_game(nx.complete_bipartite_graph(3, 5), False, positions=positions)
 except KeyboardInterrupt:
   pass
 
