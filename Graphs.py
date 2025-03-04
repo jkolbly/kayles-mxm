@@ -268,8 +268,53 @@ def get_best_from_file(filename: str):
         max_so_far = grundy(G)
   return max_so_far
 
+# Prompt the user for a move and return it.
+def prompt_user_move(graph: nx.Graph, positions: dict = None) -> Move:
+  print("Input a move as either a single number ('0') for a vertex or two numbers ('0 1') for an edge.")
+  print("Type 'show' to show the graph again.")
+  
+  while True:
+    move_str = input("Type move selection: ")
+
+    if move_str.lower() in ["show", "s"]:
+      show_graph(graph, positions)
+      continue
+
+    move_split = move_str.split(" ")
+
+    try:
+      move_nums = [int(s) for s in move_split]
+      if len(move_nums) == 1:
+        if move_nums[0] not in graph.nodes:
+          print(f"{n} is not a node in the graph.")
+          continue
+        neighbors = [e[1] for e in graph.edges(move_nums[0])]
+        new_graph = graph.copy()
+        new_graph.remove_node(move_nums[0])
+        for n in neighbors:
+          if new_graph.degree[n] == 0:
+            new_graph.remove_node(n)
+        return Move(new_graph, move_nums[0])
+      elif len(move_nums) == 2:
+        if not graph.has_edge(move_nums[0], move_nums[1]):
+          print(f"{move_nums[0]} {move_nums[1]} is not an edge in the graph.")
+          continue
+        new_graph = graph.copy()
+        new_graph.remove_edge(move_nums[0], move_nums[1])
+        if new_graph.degree[move_nums[0]] == 0:
+          new_graph.remove_node(move_nums[0])
+        if new_graph.degree[move_nums[1]] == 0:
+          new_graph.remove_node(move_nums[1])
+        return Move(new_graph, move_nums[0], move_nums[1])
+      else:
+        print("Your move must be one or two integers separated by a space.")
+        continue
+    except ValueError:
+      print("Your move should be either one or two integers separated by a space.")
+      continue
+
 # Play a game against the computer using a text interface
-def play_game(graph: nx.Graph, user_first: bool, positions: dict = None):
+def play_game(graph: nx.Graph, user_first: bool, positions: dict = None, always_select_computer_move: bool = False):
   # true if it's the user's turn, false otherwise
   user_turn = user_first
 
@@ -280,64 +325,21 @@ def play_game(graph: nx.Graph, user_first: bool, positions: dict = None):
     if user_turn:
       move_strs = [f"{g.english_str} ({g.grundy})" for g in get_moves_unique(graph)]
       print(f"Available moves: {', '.join(move_strs)}")
-      print("Type your move as either a single number ('0') for a vertex or two numbers ('0 1') for an edge:")
-      print("Type 'show' to show the graph again.")
-      while True:
-        move_str = input("Your Move: ")
-        if move_str.lower() in ["show", "s"]:
-          show_graph(graph, positions)
-          continue
-        move_split = move_str.split(" ")
-        try:
-          move_nums = [int(s) for s in move_split]
-          if len(move_nums) == 1:
-            if move_nums[0] not in graph.nodes:
-              print(f"{n} is not a node in the graph.")
-              continue
-            neighbors = [e[1] for e in graph.edges(move_nums[0])]
-            graph.remove_node(move_nums[0])
-            for n in neighbors:
-              if graph.degree[n] == 0:
-                graph.remove_node(n)
-          elif len(move_nums) == 2:
-            if not graph.has_edge(move_nums[0], move_nums[1]):
-              print(f"{move_nums[0]} {move_nums[1]} is not an edge in the graph.")
-              continue
-            graph.remove_edge(move_nums[0], move_nums[1])
-            if graph.degree[move_nums[0]] == 0:
-              graph.remove_node(move_nums[0])
-            if graph.degree[move_nums[1]] == 0:
-              graph.remove_node(move_nums[1])
-          else:
-            print("Your move must be one or two integers separated by a space.")
-            continue
-        except:
-          print("Your move should be either one or two integers separated by a space.")
-          continue
-        break
+      move = prompt_user_move(graph, positions)
+      graph = move.graph
+      print(f"Player removes {move.english_str}")
       user_turn = False
     else:
       moves = get_moves_unique(graph)
       grundys = [move.grundy for move in moves]
       min_grundy = min(grundys)
-      move_choices = moves if min_grundy > 0 else [m for m in moves if m.grundy == 0]
+      optimal_moves = moves if min_grundy > 0 else [m for m in moves if m.grundy == 0]
 
-      if min_grundy == 0:
-        print("The computer will win")
-      else:
-        print("The player may win")
-
-      selected_move = move_choices[0]
-      if len(move_choices) > 1:
-        while True:
-          print(f"Optimal computer moves are: {', '.join(f'{m.english_str} ({m.grundy})' for m in move_choices)}")
-          user_selection = input("Select the move the computer will play: ")
-          if user_selection.lower() in ["show", "s"]:
-            show_graph(graph, positions)
-            continue
-          if user_selection in [m.short_str for m in move_choices]:
-            selected_move = next(m for m in move_choices if m.short_str == user_selection)
-            break
+      selected_move = optimal_moves[0]
+      if len(optimal_moves) > 1 or always_select_computer_move:
+        print(f"Optimal computer moves are: {', '.join(f'{m.english_str} ({m.grundy})' for m in optimal_moves)}")
+        print("Select the move the computer will play.")
+        selected_move = prompt_user_move(graph, positions)
 
       print(f"Computer removes {selected_move.english_str}")
       graph = selected_move.graph
