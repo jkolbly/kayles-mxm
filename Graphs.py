@@ -290,20 +290,25 @@ def play_game(graph: nx.Graph, user_first: bool, positions: dict = None):
       moves = get_moves_unique(graph)
       grundys = [grundy(move[0]) for move in moves]
       best_grundy = min(grundys)
-      best_moves = [m for i,m in enumerate(moves) if grundys[i] == best_grundy]
-      selected_move = best_moves[0]
+      move_choices = moves if best_grundy > 0 else [m for i,m in enumerate(moves) if grundys[i] == 0]
+
       if best_grundy == 0:
         print("The computer will win")
-        if len(best_moves) > 1:
-          while True:
-            print(f"Winning computer moves are: {', '.join(m[1] for m in best_moves)}")
-            user_selection = input("Select the move the computer will play: ")
-            if user_selection.lower() in ["show", "s"]:
-              show_graph(graph, positions)
-              continue
-            if user_selection in [m[1] for m in best_moves]:
-              break
-          selected_move = next(m for m in best_moves if m[1] == user_selection)
+      else:
+        print("The player may win")
+
+      selected_move = move_choices[0]
+      if len(move_choices) > 1:
+        while True:
+          print(f"Optimal computer moves are: {', '.join(f'{m[1]} ({grundy(m[0])})' for m in move_choices)}")
+          user_selection = input("Select the move the computer will play: ")
+          if user_selection.lower() in ["show", "s"]:
+            show_graph(graph, positions)
+            continue
+          if user_selection in [m[1] for m in move_choices]:
+            selected_move = next(m for m in move_choices if m[1] == user_selection)
+            break
+
       print(f"Computer removes {selected_move[1]}")
       graph = selected_move[0]
       user_turn = True
