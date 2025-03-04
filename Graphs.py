@@ -1,6 +1,8 @@
 import networkx as nx
 import Kayles
 import matplotlib.pyplot as plt
+from tabulate import tabulate
+from networkx_viewer import Viewer
 
 # The file in which grundy_cache is stored
 CACHE_FILENAME = "data/graph-cache"
@@ -13,6 +15,34 @@ grundy_cache = {}
 
 # A list of lines to add to the cache file when next updating it
 cache_buffer = []
+
+# Represents a single move in a game
+class Move:
+  # The graph given to the next player
+  graph: nx.Graph
+
+  # The first vertex involved
+  vertex0: int
+
+  # The second vertex, in the case of removing an edge
+  vertex1: int | None
+
+  # The grundy value of the graph given by this move
+  grundy: int
+
+  # The english string of this move (e.g. "vertex 0", "edge 0-1")
+  english_str: str
+
+  # The shorthand string of this move (e.g. "0", "0 1")
+  short_str: str
+
+  def __init__(self, graph: nx.Graph, vertex0: int, vertex1: int | None = None):
+    self.graph = graph
+    self.vertex0 = vertex0
+    self.vertex1 = vertex1
+    self.grundy = grundy(graph)
+    self.english_str = f"vertex {vertex0}" if vertex1 is None else f"edge {vertex0}-{vertex1}"
+    self.short_str = str(vertex0) if vertex1 is None else f"{vertex0} {vertex1}"
 
 # Write a single value to the grundy cache
 def write_to_cache(graph: nx.Graph, grundy: int, graph_hash: str=None):
@@ -58,7 +88,7 @@ def load_cache():
   print("Cache loaded")
 
 # Get all states accessible from a graph
-def get_moves(graph: nx.Graph) -> list[tuple[nx.Graph, str]]:
+def get_moves(graph: nx.Graph) -> list[Move]:
   accessible_states = []
 
   # Remove a single edge and trim orphaned vertices
@@ -69,7 +99,7 @@ def get_moves(graph: nx.Graph) -> list[tuple[nx.Graph, str]]:
       new_graph.remove_node(e[0])
     if new_graph.degree[e[1]] == 0:
       new_graph.remove_node(e[1])
-    accessible_states.append((new_graph, f"edge {e[0]}-{e[1]}"))
+    accessible_states.append(Move(new_graph, e[0], e[1]))
 
   # Remove a vertex and trim orphaned vertices
   for v in graph.nodes:
@@ -79,18 +109,18 @@ def get_moves(graph: nx.Graph) -> list[tuple[nx.Graph, str]]:
     for n in neighbors:
       if new_graph.degree[n] == 0:
         new_graph.remove_node(n)
-    accessible_states.append((new_graph, f"vertex {v}"))
+    accessible_states.append(Move(new_graph, v, None))
   
   return accessible_states
 
 # Get all states accessible from a graph, removing isomorphic states
-def get_moves_unique(graph: nx.Graph) -> list[tuple[nx.Graph, str]]:
+def get_moves_unique(graph: nx.Graph) -> list[Move]:
   isoclasses = {}
   
   for m in get_moves(graph):
-    hash = nx.weisfeiler_lehman_graph_hash(m[0])
+    hash = nx.weisfeiler_lehman_graph_hash(m.graph)
     if hash in isoclasses:
-      if any(nx.is_isomorphic(m[0], g[0]) for g in isoclasses[hash]):
+      if any(nx.is_isomorphic(m.graph, g.graph) for g in isoclasses[hash]):
         isoclasses[hash].append(m)
     else:
       isoclasses[hash] = [m]
@@ -121,7 +151,7 @@ def grundy(graph: nx.Graph) -> int:
         return cache_line[1]
 
   # The grundy values of accessible states
-  grundys = set(grundy(G[0]) for G in get_moves(graph))
+  grundys = set(m.grundy for m in get_moves(graph))
 
   # The grundy value is the mex of the computed grundys
   ret = Kayles.mex(grundys)
@@ -248,7 +278,7 @@ def play_game(graph: nx.Graph, user_first: bool, positions: dict = None):
   while len(graph.edges) > 0:
     show_graph(graph, positions)
     if user_turn:
-      move_strs = [f"{s} ({grundy(g)})" for g, s in get_moves_unique(graph)]
+      move_strs = [f"{g.english_str} ({g.grundy})" for g in get_moves_unique(graph)]
       print(f"Available moves: {', '.join(move_strs)}")
       print("Type your move as either a single number ('0') for a vertex or two numbers ('0 1') for an edge:")
       print("Type 'show' to show the graph again.")
@@ -288,11 +318,11 @@ def play_game(graph: nx.Graph, user_first: bool, positions: dict = None):
       user_turn = False
     else:
       moves = get_moves_unique(graph)
-      grundys = [grundy(move[0]) for move in moves]
-      best_grundy = min(grundys)
-      move_choices = moves if best_grundy > 0 else [m for i,m in enumerate(moves) if grundys[i] == 0]
+      grundys = [move.grundy for move in moves]
+      min_grundy = min(grundys)
+      move_choices = moves if min_grundy > 0 else [m for m in moves if m.grundy == 0]
 
-      if best_grundy == 0:
+      if min_grundy == 0:
         print("The computer will win")
       else:
         print("The player may win")
@@ -300,17 +330,17 @@ def play_game(graph: nx.Graph, user_first: bool, positions: dict = None):
       selected_move = move_choices[0]
       if len(move_choices) > 1:
         while True:
-          print(f"Optimal computer moves are: {', '.join(f'{m[1]} ({grundy(m[0])})' for m in move_choices)}")
+          print(f"Optimal computer moves are: {', '.join(f'{m.english_str} ({m.grundy})' for m in move_choices)}")
           user_selection = input("Select the move the computer will play: ")
           if user_selection.lower() in ["show", "s"]:
             show_graph(graph, positions)
             continue
-          if user_selection in [m[1] for m in move_choices]:
-            selected_move = next(m for m in move_choices if m[1] == user_selection)
+          if user_selection in [m.short_str for m in move_choices]:
+            selected_move = next(m for m in move_choices if m.short_str == user_selection)
             break
 
-      print(f"Computer removes {selected_move[1]}")
-      graph = selected_move[0]
+      print(f"Computer removes {selected_move.english_str}")
+      graph = selected_move.graph
       user_turn = True
   
   if user_turn:
